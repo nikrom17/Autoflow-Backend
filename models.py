@@ -59,6 +59,7 @@ class Location(db.Model):
         self,
         client_id,
         location_name,
+        primary_location,
         primary_contact,
         email,
         address,
@@ -69,6 +70,7 @@ class Location(db.Model):
     ):
         self.client_id = client_id
         self.location_name = location_name
+        self.primary_location = primary_location
         self.primary_contact = primary_contact
         self.email = email
         self.address = address
@@ -94,6 +96,7 @@ class Location(db.Model):
         return {
             'client_id': self.client_id,
             'location_name': self.location_name,
+            'primary_location': self.primary_location,
             'primary_contact': self.primary_contact,
             'email': self.email,
             'address': self.address,
@@ -229,6 +232,7 @@ def addLocationData():
         location = Location(
             data["client_id"],
             data["location_name"],
+            data["primary_location"],
             data["primary_contact"],
             data["email"],
             data["address"],
