@@ -6,6 +6,7 @@ from flask_cors import CORS
 
 from auth import AuthError, requires_auth
 from models import setup_db, db, Location, Client, Delivery
+from utils import default_response
 
 app = Flask(__name__)
 setup_db(app)
@@ -49,13 +50,8 @@ def get_client_deliveries(client_id):
     query = Delivery.query.join(Client).filter(Delivery.client_id==client_id).all()
     deliveries = [delivery.format() for delivery in query]
     # for delivery in deliveries:
-    #     print(delivery)
-    return jsonify({
-        'success': True,
-        'code': 200,
-        'deliveries': deliveries,
-    })
-
+    #     print(delivery['client_id'])
+    return default_response(deliveries, 'deliveries')
 
 @app.errorhandler(404)
 def not_found(error):

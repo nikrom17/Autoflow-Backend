@@ -94,6 +94,7 @@ class Location(db.Model):
 
     def format(self):
         return {
+            'id': self.id,
             'client_id': self.client_id,
             'location_name': self.location_name,
             'primary_location': self.primary_location,
@@ -169,6 +170,7 @@ class Delivery(db.Model):
 
     def format(self):
         return {
+            'id': self.id,
             "client_id": self.client_id,
             "date_created": self.date_created,
             "item": self.item,
@@ -211,14 +213,8 @@ class Client(db.Model):
 
     def format(self):
         return {
-            'company_name': self.company_name,
-            'primary_contact': self.primary_contact,
-            'email': self.email,
-            'address': self.address,
-            'city': self.city,
-            'state': self.state,
-            'zip_code': self.zip_code,
-            'phone': self.phone,
+            'id': self.id,
+            'name': self.name,
         }
 
 
