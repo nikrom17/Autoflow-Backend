@@ -132,7 +132,7 @@ class Delivery(db.Model):
     date_created = Column(DateTime)
     item = Column(String)
     notes = Column(String, nullable=True)
-    date_fulfilled = Column(DateTime, nullable=True)
+    date_fulfilled = Column(DateTime)
     pickup_location_id = Column(Integer, ForeignKey('location.id'))
     dropoff_location_id = Column(Integer, ForeignKey('location.id'))
     pickup_location = relationship("Location", foreign_keys=[pickup_location_id])
@@ -152,7 +152,7 @@ class Delivery(db.Model):
         self.date_created = date_created,
         self.item = item,
         self.notes = notes,
-        self.date_fulfilled, date_fulfilled,
+        self.date_fulfilled = date_fulfilled,
         self.pickup_location_id = pickup_location_id,
         self.dropoff_location_id = dropoff_location_id
     

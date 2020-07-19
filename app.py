@@ -29,15 +29,31 @@ def get_clients():
 @app.route('/locations/<int:client_id>', methods=['GET'])
 # @requires_auth('')
 def get_client_locations(client_id):
+    if not Client.query.get(client_id):
+        abort(404)
     query = Location.query.join(Client).filter(Location.client_id==client_id).all()
     locations = [location.format() for location in query]
-    print(len(query))
-    for location in locations:
-        print(location)
+    # for location in locations:
+    #     print(location)
     return jsonify({
         'success': True,
         'code': 200,
         'locations': locations,
+    })
+
+@app.route('/deliveries/<int:client_id>', methods=['GET'])
+# @requires_auth('')
+def get_client_deliveries(client_id):
+    if not Client.query.get(client_id):
+        abort(404)
+    query = Delivery.query.join(Client).filter(Delivery.client_id==client_id).all()
+    deliveries = [delivery.format() for delivery in query]
+    # for delivery in deliveries:
+    #     print(delivery)
+    return jsonify({
+        'success': True,
+        'code': 200,
+        'deliveries': deliveries,
     })
 
 
