@@ -5,30 +5,39 @@ import json
 from flask_cors import CORS
 
 from auth import AuthError, requires_auth
-from models import db_drop_and_create_all, setup_db, db
+from models import setup_db, db, Location, Client, Delivery
 
 app = Flask(__name__)
 setup_db(app)
 CORS(app)
 
-'''
-uncomment the following line to initialize the datbase
-!! NOTE THIS WILL DROP ALL RECORDS AND START YOUR DB FROM SCRATCH
-!! NOTE THIS MUST BE UNCOMMENTED ON FIRST RUN
-'''
-db_drop_and_create_all()
-
 
 # ROUTES
-@app.route('/home', methods=['GET'])
-@requires_auth('')
-def get_drinks(payload):
-    drinks_query = Drink.query.all()
-    drinks = [drink.short() for drink in drinks_query]
+@app.route('/clients', methods=['GET'])
+# @requires_auth('')
+def get_clients():
+    clients = Client.query.outerjoin(Location, Client.id == Location.client_id).outerjoin(Delivery, Client.id == Delivery.client_id).all()
+    # clients2 = Client.query.all()
+    for client in clients:
+        print(client)
     return jsonify({
         'success': True,
         'code': 200,
-        'drinks': drinks,
+        # 'clients': clients,
+    })
+
+@app.route('/locations/<int:client_id>', methods=['GET'])
+# @requires_auth('')
+def get_client_locations(client_id):
+    query = Location.query.join(Client).filter(Location.client_id==client_id).all()
+    locations = [location.format() for location in query]
+    print(len(query))
+    for location in locations:
+        print(location)
+    return jsonify({
+        'success': True,
+        'code': 200,
+        'locations': locations,
     })
 
 
