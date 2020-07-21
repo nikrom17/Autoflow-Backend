@@ -49,7 +49,7 @@ def get_deliveries():
     except Exception as e:
         abort(500, e)
 
-@app.route('/deliveries/<int:client_id>', methods=['GET'])
+@app.route('/deliveries/client/<int:client_id>', methods=['GET'])
 # @requires_auth('')
 def get_client_deliveries(client_id):
     try:
@@ -60,6 +60,17 @@ def get_client_deliveries(client_id):
         return default_response(deliveries, 'deliveries')
     except Exception as e:
         abort(500)
+
+@app.route('/deliveries/<int:delivery_id>', methods=['GET'])
+# @requires_auth('')
+def get_delivery(delivery_id):
+    try:
+        delivery = Delivery.query.get(delivery_id)
+        if not delivery:
+            abort(404)
+        return default_response([delivery.format()], 'deliveries')
+    except Exception as e:
+        abort(500, e)
 
 @app.errorhandler(500)
 def not_found(error):
