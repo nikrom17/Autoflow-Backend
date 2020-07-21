@@ -17,57 +17,77 @@ CORS(app)
 @app.route('/clients', methods=['GET'])
 # @requires_auth('')
 def get_clients():
-    clients = Client.query.outerjoin(Location, Client.id == Location.client_id).outerjoin(Delivery, Client.id == Delivery.client_id).all()
-    # clients2 = Client.query.all()
-    for client in clients:
-        print(client)
-    return jsonify({
-        'success': True,
-        'code': 200,
-        # 'clients': clients,
-    })
+    try:
+        query_result = Client.query.all()
+        clients = [client.format() for client in query_result]
+        return default_response(clients, 'clients')
+    except Exception as e:
+        abort(500)
+
 
 @app.route('/locations/<int:client_id>', methods=['GET'])
 # @requires_auth('')
 def get_client_locations(client_id):
-    if not Client.query.get(client_id):
-        abort(404)
-    query = Location.query.join(Client).filter(Location.client_id==client_id).all()
-    locations = [location.format() for location in query]
-    # for location in locations:
-    #     print(location)
-    return jsonify({
-        'success': True,
-        'code': 200,
-        'locations': locations,
-    })
+    try:
+        if not Client.query.get(client_id):
+            abort(404)
+        query_result = Location.query.join(Client).filter(Location.client_id==client_id).all()
+        locations = [location.format() for location in query_result]
+        return default_response(locations, 'locations')
+    except Exception as e:
+        abort(500)
+    finally:
+        raise e
+
+@app.route('/deliveries', methods=['GET'])
+# @requires_auth('')
+def get_deliveries():
+    try:
+        query_result = Delivery.query.all()
+        deliveries = [delivery.format() for delivery in query_result]
+        return default_response(deliveries, 'deliveries')
+    except Exception as e:
+        abort(500, e)
 
 @app.route('/deliveries/<int:client_id>', methods=['GET'])
 # @requires_auth('')
 def get_client_deliveries(client_id):
-    if not Client.query.get(client_id):
-        abort(404)
-    query = Delivery.query.join(Client).filter(Delivery.client_id==client_id).all()
-    deliveries = [delivery.format() for delivery in query]
-    # for delivery in deliveries:
-    #     print(delivery['client_id'])
-    return default_response(deliveries, 'deliveries')
+    try:
+        if not Client.query.get(client_id):
+            abort(404)
+        query_result = Delivery.query.join(Client).filter(Delivery.client_id==client_id).all()
+        deliveries = [delivery.format() for delivery in query_result]
+        return default_response(deliveries, 'deliveries')
+    except Exception as e:
+        abort(500)
 
+@app.errorhandler(500)
+def not_found(error):
+    return jsonify({
+        "message": "Server Error",
+        "code": 500,
+        "description": str(error),
+        "success": False,
+    }), 500
+    
+    
 @app.errorhandler(404)
 def not_found(error):
     return jsonify({
+        "message": "Not Found",
+        "code": 404,
+        "description": "We couldn't find what you were looking for",
         "success": False,
-        "error": 404,
-        "message": "resource not found"
     }), 404
 
 
 @app.errorhandler(403)
 def forbidden(error):
     return jsonify({
+        "message": "Forbiden",
+        "code": 403,
+        "description": "You are not authorized to access the resource",
         "success": False,
-        "error": 403,
-        "message": "resource forbidden"
     }), 403
 
 
@@ -75,15 +95,16 @@ def forbidden(error):
 def bad_request(error):
     return jsonify({
         "success": False,
-        "error": 400,
-        "message": error.description
+        "code": 400,
+        "description": error.message
     }), 400
 
 
 @app.errorhandler(401)
 def unauthorized(error):
     return jsonify({
+        "message": "Unauthorized",
+        "code": 401,
+        "description": "Please login",
         "success": False,
-        "error": 401,
-        "message": error.description
     }), 401
