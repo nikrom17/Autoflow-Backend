@@ -24,8 +24,28 @@ def get_clients():
     except Exception as e:
         abort(500)
 
+@app.route('/clients/<int:client_id>', methods=['GET'])
+# @requires_auth('')
+def get_client(client_id):
+    try:
+        client = Client.query.get(client_id)
+        if not client:
+            abort(404)
+        return default_response([location.format()], 'clients')
+    except Exception as e:
+        abort(500, e)
 
-@app.route('/locations/<int:client_id>', methods=['GET'])
+@app.route('/locations', methods=['GET'])
+# @requires_auth('')
+def get_locations():
+    try:
+        query_result = Location.query.all()
+        locations = [location.format() for location in query_result]
+        return default_response(locations, 'locations')
+    except Exception as e:
+        abort(500, e)
+
+@app.route('/locations/client/<int:client_id>', methods=['GET'])
 # @requires_auth('')
 def get_client_locations(client_id):
     try:
@@ -35,9 +55,18 @@ def get_client_locations(client_id):
         locations = [location.format() for location in query_result]
         return default_response(locations, 'locations')
     except Exception as e:
-        abort(500)
-    finally:
-        raise e
+        abort(500, e)
+
+@app.route('/locations/<int:location_id>', methods=['GET'])
+# @requires_auth('')
+def get_location(location_id):
+    try:
+        location = Delivery.query.get(location_id)
+        if not location:
+            abort(404)
+        return default_response([location.format()], 'locations')
+    except Exception as e:
+        abort(500, e)
 
 @app.route('/deliveries', methods=['GET'])
 # @requires_auth('')
