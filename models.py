@@ -30,7 +30,7 @@ def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
-    # db_drop_and_create_all()
+    db_drop_and_create_all()
 
 
 
@@ -78,8 +78,8 @@ class Location(db.Model):
         self.state = state
         self.zip_code = zip_code
         self.phone = phone
-        # self.pickups = pickups
-        # self.dropoffs = dropoffs
+        self.pickups = pickups
+        self.dropoffs = dropoffs
 
     def insert(self):
         db.session.add(self)
@@ -195,10 +195,10 @@ class Client(db.Model):
     locations = relationship("Location", backref='owner')
     deliveries = relationship("Delivery")
 
-    def __init__(self, name):
+    def __init__(self, name, locations, deliveries):
         self.name = name,
-        # self.locations = locations
-        # self.deliveries = deliveries
+        self.locations = locations
+        self.deliveries = deliveries
 
     def insert(self):
         db.session.add(self)
@@ -215,6 +215,8 @@ class Client(db.Model):
         return {
             'id': self.id,
             'name': self.name,
+            'locations': self.locations,
+            'deliveries': self.deliveries,
         }
 
 
@@ -257,8 +259,8 @@ def addClientData():
     for data in client_default_data:
         client = Client(
             data["name"],
-            # data["locations"],
-            # data["deliveries"],
+            data["locations"],
+            data["deliveries"],
         )
         client.insert()
 

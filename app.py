@@ -31,7 +31,7 @@ def get_client(client_id):
         client = Client.query.get(client_id)
         if not client:
             abort(404)
-        return default_response([location.format()], 'clients')
+        return default_response([client.format()], 'clients')
     except Exception as e:
         abort(500, e)
 
