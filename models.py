@@ -1,8 +1,6 @@
-import os
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, Float, create_engine, ForeignKey
+from sqlalchemy import Column, String, Integer, DateTime, Float, create_engine, ForeignKey
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
-import json
 
 from sqlalchemy.sql.expression import true
 
@@ -49,8 +47,8 @@ class Lead(db.Model):
     chanceToConvert = Column(Float)
     dateCreated = Column(DateTime)
     email = Column(String, nullable=true)
-    funnelStepId = Column(Integer, ForeignKey('funnelStep.id')) #todo check if this is legit
-    funnelStep = relationship("FunnelStep", back_populates="leads") # leads have a many to one relationship w/ funnel steps
+    funnelStepId = Column(Integer, ForeignKey('funnelStep.id'))
+    funnelStep = relationship("FunnelStep", back_populates="leads")
     lastComm = Column(DateTime)
     name = Column(String)
     phone = Column(String)
@@ -108,14 +106,13 @@ class Opportunity(db.Model):
     __tablename__ = 'opportunity'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String)
     funnelStep = relationship("FunnelStep", back_populates="opportunity")
+    name = Column(String)
 
     def __init__(
         self,
         name,
     ):
-
         self.name = name
 
     def insert(self):
@@ -144,17 +141,16 @@ class FunnelStep(db.Model):
     __tablename__ = 'funnelStep'
 
     id = Column(Integer, primary_key=True)
-    name = Column(String)
-    opportunityId = Column(Integer, ForeignKey('opportunity.id'))
-    opportunity = relationship("Opportunity", back_populates="funnelStep")
     leads = relationship("Lead", back_populates="funnelStep")
+    name = Column(String)
+    opportunity = relationship("Opportunity", back_populates="funnelStep")
+    opportunityId = Column(Integer, ForeignKey('opportunity.id'))
 
     def __init__(
         self,
         name,
         opportunityId
     ):
-
         self.name = name
         self.opportunityId = opportunityId
 
