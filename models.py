@@ -1,8 +1,10 @@
 import os
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, create_engine, ForeignKey
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, Float, create_engine, ForeignKey
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 import json
+
+from sqlalchemy.sql.expression import true
 
 database_name = "autoflow"
 database_path = "postgres://{}/{}".format('localhost:5432', database_name)
@@ -30,56 +32,48 @@ def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
-    db_drop_and_create_all()
+    # db_drop_and_create_all()
 
 
 
 '''
-Locations
+Leads
 
 '''
 
-
-class Location(db.Model):
-    __tablename__ = 'location'
+class Lead(db.Model):
+    __tablename__ = 'lead'
 
     id = Column(Integer, primary_key=True)
-    client_id = Column(Integer, ForeignKey('client.id'))
-    location_name = Column(String)
-    primary_location = Column(Boolean)
-    primary_contact = Column(String)
-    email = Column(String)
-    address = Column(String)
-    city = Column(String)
-    state = Column(String)
-    zip_code = Column(String)
+    address = Column(String, nullable=true)
+    chanceToConvert = Column(Float)
+    dateCreated = Column(DateTime)
+    email = Column(String, nullable=true)
+    funnelStepId = Column(Integer, ForeignKey('funnelStep.id')) #todo check if this is legit
+    funnelStep = relationship("FunnelStep", back_populates="leads") # leads have a many to one relationship w/ funnel steps
+    lastComm = Column(DateTime)
+    name = Column(String)
     phone = Column(String)
 
     def __init__(
         self,
-        client_id,
-        location_name,
-        primary_location,
-        primary_contact,
-        email,
         address,
-        city,
-        state,
-        zip_code,
+        chanceToConvert,
+        dateCreated,
+        email,
+        funnelStepId,
+        lastComm,
+        name,
         phone,
     ):
-        self.client_id = client_id
-        self.location_name = location_name
-        self.primary_location = primary_location
-        self.primary_contact = primary_contact
-        self.email = email
         self.address = address
-        self.city = city
-        self.state = state
-        self.zip_code = zip_code
+        self.chanceToConvert = chanceToConvert
+        self.dateCreated = dateCreated
+        self.email = email
+        self.funnelStepId = funnelStepId
+        self.lastComm = lastComm
+        self.name = name
         self.phone = phone
-        self.pickups = pickups
-        self.dropoffs = dropoffs
 
     def insert(self):
         db.session.add(self)
@@ -95,110 +89,34 @@ class Location(db.Model):
     def format(self):
         return {
             'id': self.id,
-            'client_id': self.client_id,
-            'location_name': self.location_name,
-            'primary_location': self.primary_location,
-            'primary_contact': self.primary_contact,
+            'chanceToConvert': self.chanceToConvert,
+            'dateCreated': self.dateCreated,
             'email': self.email,
-            'address': self.address,
-            'city': self.city,
-            'state': self.state,
-            'zip_code': self.zip_code,
-            'phone': self.phone,
-        }
-        
-
-    def format_full_join(self):
-        return {
-            'company_name': self.company_name,
-            'primary_contact': self.primary_contact,
-            'email': self.email,
-            'address': self.address,
-            'city': self.city,
-            'state': self.state,
-            'zip_code': self.zip_code,
+            'funnelStepId': self.funnelStepId,
+            'lastComm': self.lastComm,
+            'name': self.name,
             'phone': self.phone,
         }
 
+
 '''
-Delivery
-'''
-
-
-class Delivery(db.Model):
-    __tablename__ = 'delivery'
-
-    id = Column(Integer, primary_key=True)
-    client_id = Column(Integer, ForeignKey('client.id'))
-    date_created = Column(DateTime)
-    item = Column(String)
-    notes = Column(String, nullable=True)
-    date_fulfilled = Column(DateTime)
-    pickup_location_id = Column(Integer, ForeignKey('location.id'))
-    dropoff_location_id = Column(Integer, ForeignKey('location.id'))
-    pickup_location = relationship("Location", foreign_keys=[pickup_location_id])
-    dropoff_location = relationship("Location", foreign_keys=[dropoff_location_id])
-
-    def __init__(
-        self,
-        client_id,
-        date_created,
-        item,
-        notes,
-        date_fulfilled,
-        pickup_location_id,
-        dropoff_location_id,
-    ):
-        self.client_id = client_id,
-        self.date_created = date_created,
-        self.item = item,
-        self.notes = notes,
-        self.date_fulfilled = date_fulfilled,
-        self.pickup_location_id = pickup_location_id,
-        self.dropoff_location_id = dropoff_location_id
-    
-    def insert(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def update(self):
-        db.session.commit()
-
-    def delete(self):
-        db.session.delete(self)
-        db.session.commit()
-
-    def format(self):
-        return {
-            'id': self.id,
-            "client_id": self.client_id,
-            "date_created": self.date_created,
-            "item": self.item,
-            "notes": self.notes,
-            "date_fulfilled": self.date_fulfilled,
-            "pickup_location_id": self.pickup_location_id,
-            "dropoff_location_id": self.dropoff_location_id,
-        }
-        
-        
-'''
-Client
+Opportunities
 
 '''
 
-
-class Client(db.Model):
-    __tablename__ = 'client'
+class Opportunity(db.Model):
+    __tablename__ = 'opportunity'
 
     id = Column(Integer, primary_key=True)
     name = Column(String)
-    locations = relationship("Location", backref='owner')
-    deliveries = relationship("Delivery")
+    funnelStep = relationship("FunnelStep", back_populates="opportunity")
 
-    def __init__(self, name, locations, deliveries):
-        self.name = name,
-        self.locations = locations
-        self.deliveries = deliveries
+    def __init__(
+        self,
+        name,
+    ):
+
+        self.name = name
 
     def insert(self):
         db.session.add(self)
@@ -215,181 +133,359 @@ class Client(db.Model):
         return {
             'id': self.id,
             'name': self.name,
-            'locations': self.locations,
-            'deliveries': self.deliveries,
         }
+
+'''
+Funnel Steps
+
+'''
+
+class FunnelStep(db.Model):
+    __tablename__ = 'funnelStep'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    opportunityId = Column(Integer, ForeignKey('opportunity.id'))
+    opportunity = relationship("Opportunity", back_populates="funnelStep")
+    leads = relationship("Lead", back_populates="funnelStep")
+
+    def __init__(
+        self,
+        name,
+        opportunityId
+    ):
+
+        self.name = name
+        self.opportunityId = opportunityId
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def format(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'opportunityId' : self.opportunityId,
+        }
+        
 
 
 # ---------------------------------------------------------------------------- #
 # Initialize Database
 # ---------------------------------------------------------------------------- #
 
-
-def addLocationData():
-    for data in location_default_data:
-        location = Location(
-            data["client_id"],
-            data["location_name"],
-            data["primary_location"],
-            data["primary_contact"],
-            data["email"],
+def addLeadData():
+    for data in leads_default_data:
+        location = Lead(
             data["address"],
-            data["city"],
-            data["state"],
-            data["zip_code"],
+            data["chanceToConvert"],
+            data["dateCreated"],
+            data["email"],
+            data["funnelStepId"],
+            data["lastComm"],
+            data["name"],
             data["phone"],
         )
         location.insert()
 
 
-def addDeliveryData():
-    for data in delivery_default_data:
-        delivery = Delivery(
-            data["client_id"],
-            data["date_created"],
-            data["item"],
-            data["notes"],
-            data["date_fulfilled"],
-            data["pickup_location_id"],
-            data["dropoff_location_id"],
-        )
-        delivery.insert()
-        
-def addClientData():
-    for data in client_default_data:
-        client = Client(
+def addOpportunityData():
+    for data in opportunites_default_data:
+        opportunity = Opportunity(
             data["name"],
-            data["locations"],
-            data["deliveries"],
         )
-        client.insert()
+        print(opportunity)
+        opportunity.insert()
+        
+def addFunnelStepData():
+    for data in funnel_step_default_data:
+        funnelStep = FunnelStep(
+            data["name"],
+            data["opportunityId"],
+        )
+        funnelStep.insert()
 
 def initializeDb():
     print('****** Initializing DB ******')
-    addClientData()
-    addLocationData()
-    addDeliveryData()
+    addOpportunityData()
+    addFunnelStepData()
+    addLeadData()
 
 # ---------------------------------------------------------------------------- #
 # Initial App Data
 # ---------------------------------------------------------------------------- #
 
-location_default_data = [
+leads_default_data = [
 {
-    "client_id": 1,
-    "location_name": "HQ",
-    "primary_location": True,
-    "primary_contact": "Jack Dorsey",
+    "address": "1355 Market St #900, San Franciso, CA, 94103",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "jdorsey@twitter.com",
-    "address": "1355 Market St #900",
-    "city": "San Francisco",
-    "state": "CA",
-    "zip_code": "94103",
+    "funnelStepId": 1,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "Jack Dorsey",
     "phone": "+14152229670",
-    "pickups": [1,2],
-    "dropoffs": [4,6],
 },
 {
-    "client_id": 2,
-    "location_name": "HQ",
-    "primary_location": True,
-    "primary_contact": "Elon Musk",
-    "email": "emusk@tesla.com",
-    "address": "3500 Deer Creek Rd",
-    "city": "Palo Alto",
-    "state": "CA",
-    "zip_code": "94304",
-    "phone": "+14152229670",
-    "pickups": [3,4],
-    "dropoffs": [1,2,5], 
+    "address": "9665 Cleveland St, Waterloo, IA 50701",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
+    "email": "weidai@icloud.com",
+    "funnelStepId": 1,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "Mahaut Brennan",
+    "phone": "+15039400326",
 },
 {
-    "client_id": 3,
-    "location_name": "Campus",
-    "primary_location": True,
-    "primary_contact": "Jamie Parenteau",
-    "email": "jparenteau@42.us.org",
-    "address": "6600 Dumbarton Circle",
-    "city": "Fremont",
-    "state": "CA",
-    "zip_code": "94555",
-    "phone": "+14152229670",
-    "pickups": [5,6],
-    "dropoffs": [3],  
+    "address": "8997 Summit St, Avon, IN 4612",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
+    "email": "cyrus@yahoo.com",
+    "funnelStepId": 2,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "Janice Perez",
+    "phone": "+16315750173",
+},
+{
+    "address": "253 Edgewater Lane, Elyria, OH 44035",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
+    "email": "bolow@mac.com",
+    "funnelStepId": 2,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "Lawrence Lowe",
+    "phone": "+16102496449",
+},
+{
+    "address": "196 Armstrong Avenue, Leland, NC 28451",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
+    "email": "violinhi@yahoo.com",
+    "funnelStepId": 3,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "George Wells",
+    "phone": "+18068957878",
+},
+{
+    "address": "711 East Shore St, Mays Landing, NJ 08330",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
+    "email": "greear@sbcglobal.net",
+    "funnelStepId": 4,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "Kelly Castillo",
+    "phone": "+18145692368",
+},
+{
+    "address": "601 North St Louis Drive, Bedford, OH 44146",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
+    "email": "elflord@gmail.com",
+    "funnelStepId": 8,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "Owen Christensen",
+    "phone": "+16206600336",
+},
+{
+    "address": "29 Mountainview St, Matthews, NC 28104",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
+    "email": "sakusha@live.com",
+    "funnelStepId": 8,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "Janis Houston",
+    "phone": "+16624035765",
+},
+{
+    "address": "9783 Purple Finch St, Saint Petersburg, FL 33702",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
+    "email": "jshirley@gmail.com",
+    "funnelStepId": 9,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "Malcolm Ryan",
+    "phone": "+19156131347",
+},
+{
+    "address": "9236 N. Grand Avenue, Webster, NY 14580",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
+    "email": "jkonit@live.com",
+    "funnelStepId": 10,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "Leah Reeves",
+    "phone": "+15077972317",
+},
+{
+    "address": "7675 Albany Street, North Canton, OH 44720",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
+    "email": "moonlapse@outlook.com",
+    "funnelStepId": 15,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "Trevor Fleming",
+    "phone": "+15165758539",
+},
+{
+    "address": "9266 W. Alton Court, Howell, NJ 07731",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
+    "email": "sopwith@msn.com",
+    "funnelStepId": 22,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "Raymond Rios",
+    "phone": "+19707794663",
+},
+{
+    "address": "8431 High Noon Drive, Dublin, GA 31021",
+    "chanceToConvert": 0.35,
+    "dateCreated": "2021-02-26T15:32:37.843Z",
+    "email": "wetter@gmail.com",
+    "funnelStepId": 23,
+    "lastComm": "2021-02-26T15:32:37.843Z",
+    "name": "Nathaniel Harris",
+    "phone": "+12025550228",
 }]
 
-delivery_default_data = [
+opportunites_default_data = [
     {
-        "client_id": 1,
-        "date_created": "2019-05-21T21:30:00.000Z",
-        "item": "Mackbook Pro",
-        "notes": "This is a gray 15\" model",
-        "pickup_location_id": 1,
-        "dropoff_location_id": 2,
-        "date_fulfilled": "2019-05-21T21:30:00.000Z",
+        'name': "Individual Tax Return",
     },
     {
-        "client_id": 1,
-        "date_created": "2019-05-21T21:30:00.000Z",
-        "item": "Lunch",
-        "notes": "Its a PB & J sandwitch and an apple",
-        "pickup_location_id": 1,
-        "dropoff_location_id": 2,
-        "date_fulfilled": None,
+        'name': "Business Tax Return",
     },
     {
-        "client_id": 2,
-        "date_created": "2019-05-21T21:30:00.000Z",
-        "item": "Intern",
-        "notes": "Intern's name is Dan",
-        "pickup_location_id": 2,
-        "dropoff_location_id": 3,
-        "date_fulfilled": "2019-05-21T21:30:00.000Z",
+        'name': "Accounting",
     },
     {
-        "client_id": 2,
-        "date_created": "2019-05-21T21:30:00.000Z",
-        "item": "Lunch",
-        "notes": "Its a steak dinner with a side of mac and cheese",
-        "pickup_location_id": 2,
-        "dropoff_location_id": 1,
-        "date_fulfilled": None,
-    },
-    {
-        "client_id": 3,
-        "date_created": "2019-05-21T21:30:00.000Z",
-        "item": "Autonomous RC car",
-        "notes": "It's name is marvin",
-        "pickup_location_id": 3,
-        "dropoff_location_id": 2,
-        "date_fulfilled": "2019-05-21T21:30:00.000Z",
-    },
-    {
-        "client_id": 3,
-        "date_created": "2019-05-21T21:30:00.000Z",
-        "item": "Lunch",
-        "notes": "It's ramen noodles",
-        "pickup_location_id": 3,
-        "dropoff_location_id": 1,
-        "date_fulfilled": None,
+        'name': "Payroll",
     },
 ]
 
 
-client_default_data= [
+funnel_step_default_data= [
+    # individual tax return
     {
-        "name": "Twitter",
-        "locations": [1],
-        "deliveries": [1,2],
+        "name": "Initial Inquiry",
+        "opportunityId": 1,
     },
     {
-        "name": "Tesla",
-        "locations": [2],
-        "deliveries": [3,4],
+        "name": "Took Questionnaire",
+        "opportunityId": 1,
     },
     {
-        "name": "42 Silicon Valley",
-        "locations": [3],
-        "deliveries": [5,6],
+        "name": "Scheduled Phone Consult",
+        "opportunityId": 1,
+    },
+    {
+        "name": "Had a Phone Consult",
+        "opportunityId": 1,
+    },
+    {
+        "name": "Expressed Interest",
+        "opportunityId": 1,
+    },
+    {
+        "name": "Created Portal Account",
+        "opportunityId": 1,
+    },
+    {
+        "name": "Signed Engagement Letter",
+        "opportunityId": 1,
+    },
+    # business tax return
+        {
+        "name": "Initial Inquiry",
+        "opportunityId": 2,
+    },
+    {
+        "name": "Took Questionnaire",
+        "opportunityId": 2,
+    },
+    {
+        "name": "Scheduled Phone Consult",
+        "opportunityId": 2,
+    },
+    {
+        "name": "Had a Phone Consult",
+        "opportunityId": 2,
+    },
+    {
+        "name": "Expressed Interest",
+        "opportunityId": 2,
+    },
+    {
+        "name": "Created Portal Account",
+        "opportunityId": 2,
+    },
+    {
+        "name": "Signed Engagement Letter",
+        "opportunityId": 2,
+    },
+    # accounting
+    {
+        "name": "Initial Inquiry",
+        "opportunityId": 3,
+    },
+    {
+        "name": "Took Questionnaire",
+        "opportunityId": 3,
+    },
+    {
+        "name": "Scheduled Phone Consult",
+        "opportunityId": 3,
+    },
+    {
+        "name": "Had a Phone Consult",
+        "opportunityId": 3,
+    },
+    {
+        "name": "Expressed Interest",
+        "opportunityId": 3,
+    },
+    {
+        "name": "Created Portal Account",
+        "opportunityId": 3,
+    },
+    {
+        "name": "Signed Engagement Letter",
+        "opportunityId": 3,
+    },
+    # payroll
+    {
+        "name": "Initial Inquiry",
+        "opportunityId": 4,
+    },
+    {
+        "name": "Took Questionnaire",
+        "opportunityId": 4,
+    },
+    {
+        "name": "Scheduled Phone Consult",
+        "opportunityId": 4,
+    },
+    {
+        "name": "Had a Phone Consult",
+        "opportunityId": 4,
+    },
+    {
+        "name": "Expressed Interest",
+        "opportunityId": 4,
+    },
+    {
+        "name": "Created Portal Account",
+        "opportunityId": 4,
+    },
+    {
+        "name": "Signed Engagement Letter",
+        "opportunityId": 4,
     },
 ]
