@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, Float, create_engine, ForeignKey
+from sqlalchemy import Column, ARRAY, String, Integer, DateTime, Float, create_engine, ForeignKey
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 
@@ -48,7 +48,7 @@ class Lead(db.Model):
     dateCreated = Column(DateTime)
     email = Column(String, nullable=true)
     funnelStepId = Column(Integer, ForeignKey('funnelStep.id'))
-    funnelStep = relationship("FunnelStep", back_populates="leads")
+    funnelStep = relationship("FunnelStep", back_populates="lead")
     lastComm = Column(DateTime)
     name = Column(String)
     phone = Column(String)
@@ -106,14 +106,17 @@ class Opportunity(db.Model):
     __tablename__ = 'opportunity'
 
     id = Column(Integer, primary_key=True)
+    funnelSteps = Column("data", ARRAY(Integer), nullable=true)
     funnelStep = relationship("FunnelStep", back_populates="opportunity")
     name = Column(String)
 
     def __init__(
         self,
         name,
+        funnelSteps
     ):
         self.name = name
+        self.funnelSteps = funnelSteps
 
     def insert(self):
         db.session.add(self)
@@ -130,6 +133,7 @@ class Opportunity(db.Model):
         return {
             'id': self.id,
             'name': self.name,
+            'funnelSteps': self.funnelSteps,
         }
 
 '''
@@ -141,7 +145,8 @@ class FunnelStep(db.Model):
     __tablename__ = 'funnelStep'
 
     id = Column(Integer, primary_key=True)
-    leads = relationship("Lead", back_populates="funnelStep")
+    leads = Column("data", ARRAY(Integer), nullable=true)
+    lead = relationship("Lead", back_populates="funnelStep")
     name = Column(String)
     opportunity = relationship("Opportunity", back_populates="funnelStep")
     opportunityId = Column(Integer, ForeignKey('opportunity.id'))
@@ -149,10 +154,12 @@ class FunnelStep(db.Model):
     def __init__(
         self,
         name,
-        opportunityId
+        opportunityId,
+        leads
     ):
         self.name = name
         self.opportunityId = opportunityId
+        self.leads = leads
 
     def insert(self):
         db.session.add(self)
@@ -170,6 +177,7 @@ class FunnelStep(db.Model):
             'id': self.id,
             'name': self.name,
             'opportunityId' : self.opportunityId,
+            'leads' : self.leads,
         }
         
 
@@ -197,6 +205,7 @@ def addOpportunityData():
     for data in opportunites_default_data:
         opportunity = Opportunity(
             data["name"],
+            data["funnelSteps"],
         )
         print(opportunity)
         opportunity.insert()
@@ -206,6 +215,7 @@ def addFunnelStepData():
         funnelStep = FunnelStep(
             data["name"],
             data["opportunityId"],
+            data["leads"],
         )
         funnelStep.insert()
 
@@ -354,15 +364,19 @@ leads_default_data = [
 opportunites_default_data = [
     {
         'name': "Individual Tax Return",
+        'funnelSteps': [1,2,3,4,5,6,7]
     },
     {
         'name': "Business Tax Return",
+        'funnelSteps': [8,9,10,11,12,13,14]
     },
     {
         'name': "Accounting",
+        'funnelSteps': [14,16,17,18,19,20,21]
     },
     {
         'name': "Payroll",
+        'funnelSteps': [22,23,24,25,26,27,28]
     },
 ]
 
@@ -372,116 +386,144 @@ funnel_step_default_data= [
     {
         "name": "Initial Inquiry",
         "opportunityId": 1,
+        "leads" : [1, 2],
     },
     {
         "name": "Took Questionnaire",
         "opportunityId": 1,
+        "leads" : [3,4],
     },
     {
         "name": "Scheduled Phone Consult",
         "opportunityId": 1,
+        "leads" : [5],
     },
     {
         "name": "Had a Phone Consult",
         "opportunityId": 1,
+        "leads" : [6],
     },
     {
         "name": "Expressed Interest",
         "opportunityId": 1,
+        "leads" : [],
     },
     {
         "name": "Created Portal Account",
         "opportunityId": 1,
+        "leads" : [],
     },
     {
         "name": "Signed Engagement Letter",
         "opportunityId": 1,
+        "leads" : [],
     },
     # business tax return
-        {
+    {
         "name": "Initial Inquiry",
         "opportunityId": 2,
+        "leads" : [7,8],
     },
     {
         "name": "Took Questionnaire",
         "opportunityId": 2,
+        "leads" : [9],
     },
     {
         "name": "Scheduled Phone Consult",
         "opportunityId": 2,
+        "leads" : [10],
     },
     {
         "name": "Had a Phone Consult",
         "opportunityId": 2,
+        "leads" : [],
     },
     {
         "name": "Expressed Interest",
         "opportunityId": 2,
+        "leads" : [],
     },
     {
         "name": "Created Portal Account",
         "opportunityId": 2,
+        "leads" : [],
     },
     {
         "name": "Signed Engagement Letter",
         "opportunityId": 2,
+        "leads" : [],
     },
     # accounting
     {
         "name": "Initial Inquiry",
         "opportunityId": 3,
+        "leads" : [11],
     },
     {
         "name": "Took Questionnaire",
         "opportunityId": 3,
+        "leads" : [],
     },
     {
         "name": "Scheduled Phone Consult",
         "opportunityId": 3,
+        "leads" : [],
     },
     {
         "name": "Had a Phone Consult",
         "opportunityId": 3,
+        "leads" : [],
     },
     {
         "name": "Expressed Interest",
         "opportunityId": 3,
+        "leads" : [],
     },
     {
         "name": "Created Portal Account",
         "opportunityId": 3,
+        "leads" : [],
     },
     {
         "name": "Signed Engagement Letter",
         "opportunityId": 3,
+        "leads" : [],
     },
     # payroll
     {
         "name": "Initial Inquiry",
         "opportunityId": 4,
+        "leads" : [12],
     },
     {
         "name": "Took Questionnaire",
         "opportunityId": 4,
+        "leads" : [13],
     },
     {
         "name": "Scheduled Phone Consult",
         "opportunityId": 4,
+        "leads" : [],
     },
     {
         "name": "Had a Phone Consult",
         "opportunityId": 4,
+        "leads" : [],
     },
     {
         "name": "Expressed Interest",
         "opportunityId": 4,
+        "leads" : [],
     },
     {
         "name": "Created Portal Account",
         "opportunityId": 4,
+        "leads" : [],
     },
     {
         "name": "Signed Engagement Letter",
         "opportunityId": 4,
+        "leads" : [],
     },
 ]

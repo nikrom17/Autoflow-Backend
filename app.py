@@ -4,7 +4,7 @@ from sqlalchemy import exc
 import json
 from flask_cors import CORS
 
-from auth import AuthError, requires_auth
+# from auth import AuthError, requires_auth
 from models import setup_db, db, Lead, Opportunity, FunnelStep
 from utils import default_response
 
@@ -15,12 +15,20 @@ CORS(app)
 
 # ROUTES
 @app.route('/opportunities', methods=['GET'])
-# @requires_auth('')
 def get_opportunities():
     try:
         query_result = Opportunity.query.all()
         opportunities = [opportunity.format() for opportunity in query_result]
         return default_response(opportunities, 'opportunities')
+    except Exception as e:
+        abort(500)
+
+@app.route('/funnel-steps', methods=['GET'])
+def get_funnel_steps():
+    try:
+        query_result = FunnelStep.query.all()
+        funnel_steps = [funnel_step.format() for funnel_step in query_result]
+        return default_response(funnel_steps, 'funnelSteps')
     except Exception as e:
         abort(500)
 
