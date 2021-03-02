@@ -2,8 +2,6 @@ from sqlalchemy import Column, ARRAY, String, Integer, DateTime, Float, create_e
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 
-from sqlalchemy.sql.expression import true
-
 database_name = "autoflow"
 database_path = "postgres://{}/{}".format('localhost:5432', database_name)
 
@@ -30,7 +28,7 @@ def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
-    # db_drop_and_create_all()
+    db_drop_and_create_all()
 
 
 
@@ -43,12 +41,13 @@ class Lead(db.Model):
     __tablename__ = 'lead'
 
     id = Column(Integer, primary_key=True)
-    address = Column(String, nullable=true)
+    address = Column(String, nullable=True)
     chanceToConvert = Column(Float)
     dateCreated = Column(DateTime)
-    email = Column(String, nullable=true)
+    email = Column(String, nullable=True)
     funnelStepId = Column(Integer, ForeignKey('funnelStep.id'))
     funnelStep = relationship("FunnelStep", back_populates="lead")
+    opportunityInfo = relationship("OpportunityInfo", back_populates="lead")
     lastComm = Column(DateTime)
     name = Column(String)
     phone = Column(String)
@@ -106,8 +105,9 @@ class Opportunity(db.Model):
     __tablename__ = 'opportunity'
 
     id = Column(Integer, primary_key=True)
-    funnelSteps = Column("data", ARRAY(Integer), nullable=true)
+    funnelSteps = Column("data", ARRAY(Integer), nullable=True)
     funnelStep = relationship("FunnelStep", back_populates="opportunity")
+    opportunityInfo = relationship("OpportunityInfo", back_populates="opportunity")
     name = Column(String)
 
     def __init__(
@@ -135,7 +135,73 @@ class Opportunity(db.Model):
             'name': self.name,
             'funnelSteps': self.funnelSteps,
         }
+        
 
+# Eventually the user will be able to add their own fields to each opportunity 
+# and these tables will be dynamically generated. This is a representation of
+# a tax return opportunity and is used for all opportunites right now.
+        
+'''
+Opportunity Info
+
+'''
+
+class OpportunityInfo(db.Model):
+    __tablename__ = 'opportunity_info'
+
+    id = Column(Integer, primary_key=True)
+    filingStatus = Column(String)
+    finalPrice = Column(String, nullable=True)
+    lead = relationship("Lead", back_populates="opportunityInfo")
+    leadId = Column(Integer, ForeignKey('lead.id'))
+    occupation = Column(String, nullable=True)
+    opportunityId = Column(Integer, ForeignKey('opportunity.id'))
+    opportunity = relationship("Opportunity", back_populates="opportunityInfo")
+    quotedPrice = Column(String, nullable=True)
+    yearlyIncome = Column(String, nullable=True)
+
+    def __init__(
+        self,
+        filingStatus,
+        finalPrice,
+        leadId,
+        occupation,
+        opportunityId,
+        quotedPrice,
+        yearlyIncome,
+    ):
+        self.filingStatus = filingStatus
+        self.finalPrice = finalPrice
+        self.leadId = leadId
+        self.occupation = occupation
+        self.opportunityId = opportunityId
+        self.quotedPrice = quotedPrice
+        self.yearlyIncome = yearlyIncome
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def format(self):
+        return {
+            'id': self.id,
+            'filingStatus': self.filingStatus,
+            'finalPrice': self.finalPrice,
+            'leadId': self.leadId,
+            'occupation': self.occupation,
+            'opportunityId': self.opportunityId,
+            'quotedPrice': self.quotedPrice,
+            'yearlyIncome': self.yearlyIncome,
+        }
+        
+        
 '''
 Funnel Steps
 
@@ -145,7 +211,7 @@ class FunnelStep(db.Model):
     __tablename__ = 'funnelStep'
 
     id = Column(Integer, primary_key=True)
-    leads = Column("data", ARRAY(Integer), nullable=true)
+    leads = Column("data", ARRAY(Integer), nullable=True)
     lead = relationship("Lead", back_populates="funnelStep")
     name = Column(String)
     opportunity = relationship("Opportunity", back_populates="funnelStep")
@@ -207,8 +273,21 @@ def addOpportunityData():
             data["name"],
             data["funnelSteps"],
         )
-        print(opportunity)
         opportunity.insert()
+
+def addOpportunityInfoData():
+    for data in opportunity_info_default_data:
+        print(data)
+        opportunityInfo = OpportunityInfo(
+            data["filingStatus"],
+            data["finalPrice"],
+            data["leadId"],
+            data["occupation"],
+            data["opportunityId"],
+            data["quotedPrice"],
+            data["yearlyIncome"],
+        )
+        opportunityInfo.insert()
         
 def addFunnelStepData():
     for data in funnel_step_default_data:
@@ -224,6 +303,7 @@ def initializeDb():
     addOpportunityData()
     addFunnelStepData()
     addLeadData()
+    addOpportunityInfoData()
 
 # ---------------------------------------------------------------------------- #
 # Initial App Data
@@ -379,7 +459,125 @@ opportunites_default_data = [
         'funnelSteps': [22,23,24,25,26,27,28]
     },
 ]
-
+opportunity_info_default_data = [
+    {
+        "filingStatus": 'Single',
+        "finalPrice": None,
+        "leadId": 1,
+        "occupation": 'Software Engineer',
+        "opportunityId": 1,
+        "quotedPrice": '$150',
+        "yearlyIncome": '$150k+',
+    },
+    {
+        "filingStatus": 'Married',
+        "finalPrice": None,
+        "leadId": 2,
+        "occupation": 'Business Analyst',
+        "opportunityId": 1,
+        "quotedPrice": '$350',
+        "yearlyIncome": '$150k+',
+    },
+    {
+        "filingStatus": 'Head of Household',
+        "finalPrice": None,
+        "leadId": 3,
+        "occupation": 'Senior Consultant',
+        "opportunityId": 1,
+        "quotedPrice": '$300',
+        "yearlyIncome": '$150k+'
+    },
+    {
+        "filingStatus": 'Single',
+        "finalPrice": None,
+        "leadId": 4,
+        "occupation": 'Senior Consultant',
+        "opportunityId": 1,
+        "quotedPrice": '$105',
+        "yearlyIncome": '$150k+',
+    },
+    {
+        "filingStatus": 'Single',
+        "finalPrice": None,
+        "leadId": 5,
+        "occupation": 'Senior Consultant',
+        "opportunityId": 1,
+        "quotedPrice": '$225',
+        "yearlyIncome": '$150k+',
+    },
+    {
+        "filingStatus": 'Married',
+        "finalPrice": None,
+        "leadId": 6,
+        'occupation': 'Senior Consultant',
+        'opportunityId': 1,
+        'quotedPrice': '$300',
+        "yearlyIncome": '$150k+',
+    },
+    {
+        'filingStatus': 'Single',
+        "finalPrice": None,
+        "leadId": 7,
+        "occupation": 'Senior Consultant',
+        "opportunityId": 2,
+        "quotedPrice": '$250',
+        "yearlyIncome": '$150k+',
+    },
+    {
+        "filingStatus": 'Single',
+        "finalPrice": None,
+        "leadId": 8,
+        "occupation": 'Senior Consultant',
+        "opportunityId": 2,
+        'quotedPrice': '$150',
+        "yearlyIncome": '$150k+',
+    },
+    {
+        "filingStatus": 'Single',
+        "finalPrice": None,
+        "leadId": 9,
+        "occupation": 'Senior Consultant',
+        "opportunityId": 2,
+        "quotedPrice": '$200',
+        "yearlyIncome": '$150k+',
+    },
+    {
+        "filingStatus": 'Single',
+        "finalPrice": None,
+        "leadId": 9,
+        "occupation": 'Senior Consultant',
+        "opportunityId": 2,
+        "quotedPrice": '$200',
+        "yearlyIncome": '$150k+',
+    },
+    {
+        "filingStatus": 'Single',
+        "finalPrice": None,
+        "leadId": 9,
+        "occupation": 'Senior Consultant',
+        "opportunityId": 3,
+        "quotedPrice": '$200',
+        "yearlyIncome": '$150k+',
+    },
+    {
+        "filingStatus": 'Single',
+        "finalPrice": None,
+        "leadId": 9,
+        "occupation": 'Senior Consultant',
+        'opportunityId': 4,
+        "quotedPrice": '$200',
+        "yearlyIncome": '$150k+',
+    },
+    {
+        "filingStatus": 'Single',
+        "finalPrice": None,
+        "leadId": 9,
+        "occupation": 'Senior Consultant',
+        "opportunityId": 4,
+        "quotedPrice": '$200',
+        "yearlyIncome": '$150k+',
+    },
+]
 
 funnel_step_default_data= [
     # individual tax return

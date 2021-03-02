@@ -5,7 +5,7 @@ import json
 from flask_cors import CORS
 
 # from auth import AuthError, requires_auth
-from models import setup_db, db, Lead, Opportunity, FunnelStep
+from models import setup_db, db, Lead, Opportunity, FunnelStep, OpportunityInfo
 from utils import default_response
 
 app = Flask(__name__)
@@ -23,12 +23,31 @@ def get_opportunities():
     except Exception as e:
         abort(500)
 
+@app.route('/opportunity-info', methods=['GET'])
+def get_opportunity_info():
+    try:
+        query_result = OpportunityInfo.query.all()
+        opportunities_info = [opportunity_info.format() for opportunity_info in query_result]
+        return default_response(opportunities_info, 'opportunities')
+    except Exception as e:
+        print(e)
+        abort(500)
+
 @app.route('/funnel-steps', methods=['GET'])
 def get_funnel_steps():
     try:
         query_result = FunnelStep.query.all()
         funnel_steps = [funnel_step.format() for funnel_step in query_result]
         return default_response(funnel_steps, 'funnelSteps')
+    except Exception as e:
+        abort(500)
+
+@app.route('/leads', methods=['GET'])
+def get_leads():
+    try:
+        query_result = Lead.query.all()
+        leads = [lead.format() for lead in query_result]
+        return default_response(leads, 'leads')
     except Exception as e:
         abort(500)
 
