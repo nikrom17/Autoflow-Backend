@@ -1,9 +1,9 @@
+import os
 from sqlalchemy import Column, ARRAY, String, Integer, DateTime, Float, create_engine, ForeignKey
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 
-database_name = "autoflow"
-database_path = "postgres://{}/{}".format('localhost:5432', database_name)
+database_path = os.environ.get('DATABASE_URL')
 
 db = SQLAlchemy()
 
