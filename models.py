@@ -16,6 +16,10 @@ def db_drop_and_create_all():
     db.drop_all()
     db.create_all()
     initializeDb()
+    
+def create_all():
+    db.create_all()
+    initializeDb()
 
 '''
 setup_db(app)
@@ -28,7 +32,7 @@ def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
-    db_drop_and_create_all()
+    create_all()
 
 
 
