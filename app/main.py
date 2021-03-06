@@ -1,20 +1,13 @@
-import os
-from flask import Flask, request, jsonify, abort
-from sqlalchemy import exc
-import json
-from flask_cors import CORS
+from flask import Blueprint, jsonify, abort
 
 # from auth import AuthError, requires_auth
-from models import setup_db, db, Lead, Opportunity, FunnelStep, OpportunityInfo
-from utils import default_response
+from .models import Lead, Opportunity, FunnelStep, OpportunityInfo
+from .utils import default_response
 
-app = Flask(__name__)
-setup_db(app)
-CORS(app)
-
+api = Blueprint('api', __name__)
 
 # ROUTES
-@app.route('/opportunities', methods=['GET'])
+@api.route('/opportunities', methods=['GET'])
 def get_opportunities():
     try:
         query_result = Opportunity.query.all()
@@ -23,7 +16,7 @@ def get_opportunities():
     except Exception as e:
         abort(500)
 
-@app.route('/opportunity-info', methods=['GET'])
+@api.route('/opportunity-info', methods=['GET'])
 def get_opportunity_info():
     try:
         query_result = OpportunityInfo.query.all()
@@ -33,7 +26,7 @@ def get_opportunity_info():
         print(e)
         abort(500)
 
-@app.route('/funnel-steps', methods=['GET'])
+@api.route('/funnel-steps', methods=['GET'])
 def get_funnel_steps():
     try:
         query_result = FunnelStep.query.all()
@@ -42,7 +35,7 @@ def get_funnel_steps():
     except Exception as e:
         abort(500)
 
-@app.route('/leads', methods=['GET'])
+@api.route('/leads', methods=['GET'])
 def get_leads():
     try:
         query_result = Lead.query.all()
@@ -51,7 +44,7 @@ def get_leads():
     except Exception as e:
         abort(500)
 
-# @app.route('/clients/<int:client_id>', methods=['GET'])
+# @api.route('/clients/<int:client_id>', methods=['GET'])
 # # @requires_auth('')
 # def get_client(client_id):
 #     try:
@@ -62,7 +55,7 @@ def get_leads():
 #     except Exception as e:
 #         abort(500, e)
 
-# @app.route('/locations', methods=['GET'])
+# @api.route('/locations', methods=['GET'])
 # # @requires_auth('')
 # def get_locations():
 #     try:
@@ -72,7 +65,7 @@ def get_leads():
 #     except Exception as e:
 #         abort(500, e)
 
-# @app.route('/locations/client/<int:client_id>', methods=['GET'])
+# @api.route('/locations/client/<int:client_id>', methods=['GET'])
 # # @requires_auth('')
 # def get_client_locations(client_id):
 #     try:
@@ -84,7 +77,7 @@ def get_leads():
 #     except Exception as e:
 #         abort(500, e)
 
-# @app.route('/locations/<int:location_id>', methods=['GET'])
+# @api.route('/locations/<int:location_id>', methods=['GET'])
 # # @requires_auth('')
 # def get_location(location_id):
 #     try:
@@ -95,7 +88,7 @@ def get_leads():
 #     except Exception as e:
 #         abort(500, e)
 
-# @app.route('/deliveries', methods=['GET'])
+# @api.route('/deliveries', methods=['GET'])
 # # @requires_auth('')
 # def get_deliveries():
 #     try:
@@ -105,7 +98,7 @@ def get_leads():
 #     except Exception as e:
 #         abort(500, e)
 
-# @app.route('/deliveries/client/<int:client_id>', methods=['GET'])
+# @api.route('/deliveries/client/<int:client_id>', methods=['GET'])
 # # @requires_auth('')
 # def get_client_deliveries(client_id):
 #     try:
@@ -117,7 +110,7 @@ def get_leads():
 #     except Exception as e:
 #         abort(500)
 
-# @app.route('/deliveries/<int:delivery_id>', methods=['GET'])
+# @api.route('/deliveries/<int:delivery_id>', methods=['GET'])
 # # @requires_auth('')
 # def get_delivery(delivery_id):
 #     try:
@@ -128,7 +121,7 @@ def get_leads():
 #     except Exception as e:
 #         abort(500, e)
 
-@app.errorhandler(500)
+@api.errorhandler(500)
 def not_found(error):
     return jsonify({
         "message": "Server Error",
@@ -138,7 +131,7 @@ def not_found(error):
     }), 500
     
     
-@app.errorhandler(404)
+@api.errorhandler(404)
 def not_found(error):
     return jsonify({
         "message": "Not Found",
@@ -148,7 +141,7 @@ def not_found(error):
     }), 404
 
 
-@app.errorhandler(403)
+@api.errorhandler(403)
 def forbidden(error):
     return jsonify({
         "message": "Forbiden",
@@ -158,7 +151,7 @@ def forbidden(error):
     }), 403
 
 
-@app.errorhandler(400)
+@api.errorhandler(400)
 def bad_request(error):
     return jsonify({
         "success": False,
@@ -167,7 +160,7 @@ def bad_request(error):
     }), 400
 
 
-@app.errorhandler(401)
+@api.errorhandler(401)
 def unauthorized(error):
     return jsonify({
         "message": "Unauthorized",
