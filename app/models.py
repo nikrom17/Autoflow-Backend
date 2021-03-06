@@ -1,11 +1,8 @@
 import os
 from sqlalchemy import Column, ARRAY, String, Integer, DateTime, Float, create_engine, ForeignKey
 from sqlalchemy.orm import relationship
-from flask_sqlalchemy import SQLAlchemy
+from .extensions import db
 
-database_path = os.environ.get('DATABASE_URL')
-
-db = SQLAlchemy()
 
 '''
 db_drop_and_create_all()
@@ -32,7 +29,7 @@ def setup_db(app, database_path=database_path):
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.app = app
     db.init_app(app)
-    create_all()
+    # create_all()
 
 
 
@@ -50,13 +47,14 @@ class Lead(db.Model):
     dateCreated = Column(DateTime)
     email = Column(String, nullable=True)
     funnelStepId = Column(Integer, ForeignKey('funnelStep.id'))
-    funnelStep = relationship("FunnelStep", back_populates="lead")
-    opportunityInfo = relationship("OpportunityInfo", back_populates="lead")
     lastContact = Column(DateTime)
     name = Column(String)
     phone = Column(String)
     status = Column(String, nullable=True)
 
+    funnelStep = relationship("FunnelStep", back_populates="lead")
+    opportunityInfo = relationship("OpportunityInfo", back_populates="lead")
+    
     def __init__(
         self,
         address,
@@ -115,9 +113,10 @@ class Opportunity(db.Model):
 
     id = Column(Integer, primary_key=True)
     funnelSteps = Column("data", ARRAY(Integer), nullable=True)
+    name = Column(String)
+    
     funnelStep = relationship("FunnelStep", back_populates="opportunity")
     opportunityInfo = relationship("OpportunityInfo", back_populates="opportunity")
-    name = Column(String)
 
     def __init__(
         self,
@@ -161,14 +160,15 @@ class OpportunityInfo(db.Model):
     id = Column(Integer, primary_key=True)
     filingStatus = Column(String)
     finalPrice = Column(String, nullable=True)
-    lead = relationship("Lead", back_populates="opportunityInfo")
     leadId = Column(Integer, ForeignKey('lead.id'))
     occupation = Column(String, nullable=True)
     opportunityId = Column(Integer, ForeignKey('opportunity.id'))
-    opportunity = relationship("Opportunity", back_populates="opportunityInfo")
     quotedPrice = Column(String, nullable=True)
     yearlyIncome = Column(String, nullable=True)
 
+    lead = relationship("Lead", back_populates="opportunityInfo")
+    opportunity = relationship("Opportunity", back_populates="opportunityInfo")
+    
     def __init__(
         self,
         filingStatus,
@@ -221,11 +221,12 @@ class FunnelStep(db.Model):
 
     id = Column(Integer, primary_key=True)
     leads = Column("data", ARRAY(Integer), nullable=True)
-    lead = relationship("Lead", back_populates="funnelStep")
     name = Column(String)
-    opportunity = relationship("Opportunity", back_populates="funnelStep")
     opportunityId = Column(Integer, ForeignKey('opportunity.id'))
 
+    lead = relationship("Lead", back_populates="funnelStep")
+    opportunity = relationship("Opportunity", back_populates="funnelStep")
+    
     def __init__(
         self,
         name,
