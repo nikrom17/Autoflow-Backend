@@ -1,37 +1,4 @@
-from flask_sqlalchemy import SQLAlchemy
-from models import Lead, Opportunity, FunnelStep, OpportunityInfo
-
-# ---------------------------------------------------------------------------- #
-# Configure Database
-# ---------------------------------------------------------------------------- #
-
-database_name = "autoflow"
-database_path = "postgres://{}/{}".format('localhost:5432', database_name)
-
-db = SQLAlchemy()
-
-'''
-db_drop_and_create_all()
-    drops the database tables and starts fresh
-    can be used to initialize a clean database
-'''
-def db_drop_and_create_all():
-    db.drop_all()
-    db.create_all()
-    initializeDb()
-
-'''
-setup_db(app)
-    binds a flask application and a SQLAlchemy service
-'''
-
-
-def setup_db(app, database_path=database_path):
-    app.config["SQLALCHEMY_DATABASE_URI"] = database_path
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    db.app = app
-    db.init_app(app)
-    db_drop_and_create_all()
+from .models import Lead, Opportunity, OpportunityInfo, FunnelStep
 
 # ---------------------------------------------------------------------------- #
 # Populate Database
@@ -39,17 +6,18 @@ def setup_db(app, database_path=database_path):
 
 def addLeadData():
     for data in leads_default_data:
-        location = Lead(
+        lead = Lead(
             data["address"],
             data["chanceToConvert"],
             data["dateCreated"],
             data["email"],
             data["funnelStepId"],
-            data["lastComm"],
+            data["lastContact"],
             data["name"],
             data["phone"],
+            data["status"],
         )
-        location.insert()
+        lead.insert()
 
 
 def addOpportunityData():
@@ -62,7 +30,6 @@ def addOpportunityData():
 
 def addOpportunityInfoData():
     for data in opportunity_info_default_data:
-        print(data)
         opportunityInfo = OpportunityInfo(
             data["filingStatus"],
             data["finalPrice"],
@@ -72,7 +39,6 @@ def addOpportunityInfoData():
             data["quotedPrice"],
             data["yearlyIncome"],
         )
-        print(opportunityInfo)
         opportunityInfo.insert()
         
 def addFunnelStepData():
@@ -84,8 +50,8 @@ def addFunnelStepData():
         )
         funnelStep.insert()
 
-def initializeDb():
-    print('****** Initializing DB ******')
+def initialize_data():
+    print('****** Initializing Data ******')
     addOpportunityData()
     addFunnelStepData()
     addLeadData()
@@ -102,9 +68,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "jdorsey@twitter.com",
     "funnelStepId": 1,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "Jack Dorsey",
     "phone": "+14152229670",
+    "status": "Follow Up"
 },
 {
     "address": "9665 Cleveland St, Waterloo, IA 50701",
@@ -112,9 +79,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "weidai@icloud.com",
     "funnelStepId": 1,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "Mahaut Brennan",
     "phone": "+15039400326",
+    "status": "Automated"
 },
 {
     "address": "8997 Summit St, Avon, IN 4612",
@@ -122,9 +90,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "cyrus@yahoo.com",
     "funnelStepId": 2,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "Janice Perez",
     "phone": "+16315750173",
+    "status": "Hot Lead"
 },
 {
     "address": "253 Edgewater Lane, Elyria, OH 44035",
@@ -132,9 +101,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "bolow@mac.com",
     "funnelStepId": 2,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "Lawrence Lowe",
     "phone": "+16102496449",
+    "status": "With Client"
 },
 {
     "address": "196 Armstrong Avenue, Leland, NC 28451",
@@ -142,9 +112,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "violinhi@yahoo.com",
     "funnelStepId": 3,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "George Wells",
     "phone": "+18068957878",
+    "status": "Automated"
 },
 {
     "address": "711 East Shore St, Mays Landing, NJ 08330",
@@ -152,9 +123,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "greear@sbcglobal.net",
     "funnelStepId": 4,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "Kelly Castillo",
     "phone": "+18145692368",
+    "status": "On Hold"
 },
 {
     "address": "601 North St Louis Drive, Bedford, OH 44146",
@@ -162,9 +134,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "elflord@gmail.com",
     "funnelStepId": 8,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "Owen Christensen",
     "phone": "+16206600336",
+    "status": "Follow Up"
 },
 {
     "address": "29 Mountainview St, Matthews, NC 28104",
@@ -172,9 +145,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "sakusha@live.com",
     "funnelStepId": 8,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "Janis Houston",
     "phone": "+16624035765",
+    "status": "Follow Up"
 },
 {
     "address": "9783 Purple Finch St, Saint Petersburg, FL 33702",
@@ -182,9 +156,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "jshirley@gmail.com",
     "funnelStepId": 9,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "Malcolm Ryan",
     "phone": "+19156131347",
+    "status": "Hot Lead"
 },
 {
     "address": "9236 N. Grand Avenue, Webster, NY 14580",
@@ -192,9 +167,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "jkonit@live.com",
     "funnelStepId": 10,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "Leah Reeves",
     "phone": "+15077972317",
+    "status": "With Client"
 },
 {
     "address": "7675 Albany Street, North Canton, OH 44720",
@@ -202,9 +178,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "moonlapse@outlook.com",
     "funnelStepId": 15,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "Trevor Fleming",
     "phone": "+15165758539",
+    "status": "Automated"
 },
 {
     "address": "9266 W. Alton Court, Howell, NJ 07731",
@@ -212,9 +189,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "sopwith@msn.com",
     "funnelStepId": 22,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "Raymond Rios",
     "phone": "+19707794663",
+    "status": "With Client"
 },
 {
     "address": "8431 High Noon Drive, Dublin, GA 31021",
@@ -222,9 +200,10 @@ leads_default_data = [
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "wetter@gmail.com",
     "funnelStepId": 23,
-    "lastComm": "2021-02-26T15:32:37.843Z",
+    "lastContact": "2021-02-26T15:32:37.843Z",
     "name": "Nathaniel Harris",
     "phone": "+12025550228",
+    "status": "Follow Up"
 }]
 
 opportunites_default_data = [
@@ -238,7 +217,7 @@ opportunites_default_data = [
     },
     {
         'name': "Accounting",
-        'funnelSteps': [14,16,17,18,19,20,21]
+        'funnelSteps': [15,16,17,18,19,20,21]
     },
     {
         'name': "Payroll",
