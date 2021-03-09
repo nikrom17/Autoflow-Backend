@@ -26,6 +26,8 @@ class Lead(db.Model):
 
     funnelStep = relationship("FunnelStep", back_populates="lead")
     opportunityInfo = relationship("OpportunityInfo", back_populates="lead")
+    todo = relationship("Todo", back_populates="lead")
+    
     
     def __init__(
         self,
@@ -237,26 +239,26 @@ class Todo(db.Model):
     __tablename__ = 'todo'
 
     id = Column(Integer, primary_key=True)
-    compleated = Column(Boolean)
-    dateCompleated = Column(String, nullable=True)
+    completed = Column(Boolean)
+    datecompleted = Column(String, nullable=True)
     dateCreated = Column(String)
     description = Column(String)
     leadId = Column(Integer, ForeignKey('lead.id'))
     priorityRank = Column(Integer)
     
-    lead = relationship("Lead", back_populates="opportunityInfo")
+    lead = relationship("Lead", back_populates="todo")
 
     def __init__(
         self,
-        compleated,
-        dateCompleated,
+        completed,
+        datecompleted,
         dateCreated,
         description,
         leadId,
         priorityRank,
     ):
-        self.compleated = compleated
-        self.dateCompleated = dateCompleated
+        self.completed = completed
+        self.datecompleted = datecompleted
         self.dateCreated = dateCreated
         self.description = description
         self.leadId = leadId
@@ -276,8 +278,8 @@ class Todo(db.Model):
     def format(self):
         return {
             'id': self.id,
-            'compleated': self.compleated,
-            'dateCompleated': self.dateCompleated,
+            'completed': self.completed,
+            'datecompleted': self.datecompleted,
             'dateCreated': self.dateCreated,
             'description': self.description,
             'leadId': self.leadId,

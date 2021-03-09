@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 
-from .main import api
+from .routes import api
 from .commands import create_tables, drop_and_create_tables, init_data
 from .extensions import db
 
