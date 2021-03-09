@@ -1,5 +1,5 @@
 import os
-from sqlalchemy import Column, ARRAY, String, Integer, DateTime, Float, create_engine, ForeignKey
+from sqlalchemy import Column, ARRAY, String, Integer, Boolean, DateTime, Float, create_engine, ForeignKey
 from sqlalchemy.orm import relationship
 
 from .extensions import db
@@ -226,5 +226,61 @@ class FunnelStep(db.Model):
             'leads' : self.leads,
             'name': self.name,
             'opportunityId' : self.opportunityId,
+        }
+
+'''
+Todos
+
+'''
+
+class Todo(db.Model):
+    __tablename__ = 'todo'
+
+    id = Column(Integer, primary_key=True)
+    compleated = Column(Boolean)
+    dateCompleated = Column(String, nullable=True)
+    dateCreated = Column(String)
+    description = Column(String)
+    leadId = Column(Integer, ForeignKey('lead.id'))
+    priorityRank = Column(Integer)
+    
+    lead = relationship("Lead", back_populates="opportunityInfo")
+
+    def __init__(
+        self,
+        compleated,
+        dateCompleated,
+        dateCreated,
+        description,
+        leadId,
+        priorityRank,
+    ):
+        self.compleated = compleated
+        self.dateCompleated = dateCompleated
+        self.dateCreated = dateCreated
+        self.description = description
+        self.leadId = leadId
+        self.priorityRank = priorityRank
+
+    def insert(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def update(self):
+        db.session.commit()
+
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def format(self):
+        return {
+            'id': self.id,
+            'compleated': self.compleated,
+            'dateCompleated': self.dateCompleated,
+            'dateCreated': self.dateCreated,
+            'description': self.description,
+            'leadId': self.leadId,
+            'priorityRank': self.priorityRank,
         }
         
