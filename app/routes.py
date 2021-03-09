@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, abort
 
 # from auth import AuthError, requires_auth
-from .models import Lead, Opportunity, FunnelStep, OpportunityInfo
+from .models import Lead, Opportunity, FunnelStep, OpportunityInfo, Todo
 from .utils import default_response
 
 api = Blueprint('api', __name__)
@@ -44,6 +44,16 @@ def get_leads():
     except Exception as e:
         abort(500)
 
+@api.route('/todos', methods=['GET'])
+def get_todos():
+    try:
+        query_result = Todo.query.all()
+        todos = [todo.format() for todo in query_result]
+        return default_response(todos, 'todos')
+    except Exception as e:
+        print(e)
+        abort(500)
+        
 # @api.route('/clients/<int:client_id>', methods=['GET'])
 # # @requires_auth('')
 # def get_client(client_id):

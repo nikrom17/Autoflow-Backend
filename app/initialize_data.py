@@ -1,4 +1,4 @@
-from .models import Lead, Opportunity, OpportunityInfo, FunnelStep
+from .models import Lead, Opportunity, OpportunityInfo, FunnelStep, Todo
 
 # ---------------------------------------------------------------------------- #
 # Populate Database
@@ -40,6 +40,18 @@ def addOpportunityInfoData():
             data["yearlyIncome"],
         )
         opportunityInfo.insert()
+
+def addTodoData():
+    for data in todos_default_data:
+        todo = Todo(
+            data["completed"],
+            data["datecompleted"],
+            data["dateCreated"],
+            data["description"],
+            data["leadId"],
+            data["priorityRank"],
+        )
+        todo.insert()
         
 def addFunnelStepData():
     for data in funnel_step_default_data:
@@ -56,6 +68,7 @@ def initialize_data():
     addFunnelStepData()
     addLeadData()
     addOpportunityInfoData()
+    addTodoData()
 
 # ---------------------------------------------------------------------------- #
 # Initial App Data
@@ -488,5 +501,112 @@ funnel_step_default_data= [
         "name": "Signed Engagement Letter",
         "opportunityId": 4,
         "leads" : [],
+    },
+]
+
+todos_default_data = [
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 1,
+      "priorityRank": 1,
+    },
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 2,
+      "priorityRank": 2,
+    },
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 3,
+      "priorityRank": 3,
+    },
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 4,
+      "priorityRank": 4,
+    },
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 5,
+      "priorityRank": 5,
+    },
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 6,
+      "priorityRank": 6,
+    },
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 7,
+      "priorityRank": 7,
+    },
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 8,
+      "priorityRank": 8,
+    },
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 9,
+      "priorityRank": 9,
+    },
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 10,
+      "priorityRank": 10,
+    },
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 11,
+      "priorityRank": 11,
+    },
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 12,
+      "priorityRank": 12,
+    },
+    {
+      "completed": False,
+      "datecompleted": None,
+      "dateCreated": "2021-02-26T15:32:37.843Z",
+      "description": "Send email",
+      "leadId": 13,
+      "priorityRank": 13,
     },
 ]
