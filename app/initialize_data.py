@@ -244,7 +244,7 @@ opportunity_info_default_data = [
         "leadId": 1,
         "occupation": 'Software Engineer',
         "opportunityId": 1,
-        "quotedPrice": '$150',
+        "quotedPrice": 150,
         "yearlyIncome": '$150k+',
     },
     {
@@ -253,7 +253,7 @@ opportunity_info_default_data = [
         "leadId": 2,
         "occupation": 'Business Analyst',
         "opportunityId": 1,
-        "quotedPrice": '$350',
+        "quotedPrice": 350,
         "yearlyIncome": '$150k+',
     },
     {
@@ -262,7 +262,7 @@ opportunity_info_default_data = [
         "leadId": 3,
         "occupation": 'Senior Consultant',
         "opportunityId": 1,
-        "quotedPrice": '$300',
+        "quotedPrice": 300,
         "yearlyIncome": '$150k+'
     },
     {
@@ -271,7 +271,7 @@ opportunity_info_default_data = [
         "leadId": 4,
         "occupation": 'Senior Consultant',
         "opportunityId": 1,
-        "quotedPrice": '$105',
+        "quotedPrice": 105,
         "yearlyIncome": '$150k+',
     },
     {
@@ -280,7 +280,7 @@ opportunity_info_default_data = [
         "leadId": 5,
         "occupation": 'Senior Consultant',
         "opportunityId": 1,
-        "quotedPrice": '$225',
+        "quotedPrice": 225,
         "yearlyIncome": '$150k+',
     },
     {
@@ -289,7 +289,7 @@ opportunity_info_default_data = [
         "leadId": 6,
         'occupation': 'Senior Consultant',
         'opportunityId': 1,
-        'quotedPrice': '$300',
+        'quotedPrice': 300,
         "yearlyIncome": '$150k+',
     },
     {
@@ -298,7 +298,7 @@ opportunity_info_default_data = [
         "leadId": 7,
         "occupation": 'Senior Consultant',
         "opportunityId": 2,
-        "quotedPrice": '$250',
+        "quotedPrice": 250,
         "yearlyIncome": '$150k+',
     },
     {
@@ -307,7 +307,7 @@ opportunity_info_default_data = [
         "leadId": 8,
         "occupation": 'Senior Consultant',
         "opportunityId": 2,
-        'quotedPrice': '$150',
+        'quotedPrice': 150,
         "yearlyIncome": '$150k+',
     },
     {
@@ -316,7 +316,7 @@ opportunity_info_default_data = [
         "leadId": 9,
         "occupation": 'Senior Consultant',
         "opportunityId": 2,
-        "quotedPrice": '$200',
+        "quotedPrice": 200,
         "yearlyIncome": '$150k+',
     },
     {
@@ -325,7 +325,7 @@ opportunity_info_default_data = [
         "leadId": 9,
         "occupation": 'Senior Consultant',
         "opportunityId": 2,
-        "quotedPrice": '$200',
+        "quotedPrice": 200,
         "yearlyIncome": '$150k+',
     },
     {
@@ -334,7 +334,7 @@ opportunity_info_default_data = [
         "leadId": 9,
         "occupation": 'Senior Consultant',
         "opportunityId": 3,
-        "quotedPrice": '$200',
+        "quotedPrice": 200,
         "yearlyIncome": '$150k+',
     },
     {
@@ -343,7 +343,7 @@ opportunity_info_default_data = [
         "leadId": 9,
         "occupation": 'Senior Consultant',
         'opportunityId': 4,
-        "quotedPrice": '$200',
+        "quotedPrice": 200,
         "yearlyIncome": '$150k+',
     },
     {
@@ -352,7 +352,7 @@ opportunity_info_default_data = [
         "leadId": 9,
         "occupation": 'Senior Consultant',
         "opportunityId": 4,
-        "quotedPrice": '$200',
+        "quotedPrice": 200,
         "yearlyIncome": '$150k+',
     },
 ]

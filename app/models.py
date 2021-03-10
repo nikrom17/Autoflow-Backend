@@ -137,7 +137,7 @@ class OpportunityInfo(db.Model):
     leadId = Column(Integer, ForeignKey('lead.id'))
     occupation = Column(String, nullable=True)
     opportunityId = Column(Integer, ForeignKey('opportunity.id'))
-    quotedPrice = Column(String, nullable=True)
+    quotedPrice = Column(Float, nullable=True)
     yearlyIncome = Column(String, nullable=True)
 
     lead = relationship("Lead", back_populates="opportunityInfo")
