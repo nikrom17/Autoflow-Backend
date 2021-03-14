@@ -7,6 +7,11 @@ from .utils import default_response
 api = Blueprint('api', __name__)
 
 # ROUTES
+
+# ---------------------------------------------------------------------------- #
+# Opportunities
+# ---------------------------------------------------------------------------- #
+
 @api.route('/opportunities', methods=['GET'])
 def get_opportunities():
     try:
@@ -15,6 +20,10 @@ def get_opportunities():
         return default_response(opportunities, 'opportunities')
     except Exception as e:
         abort(500)
+
+# ---------------------------------------------------------------------------- #
+# Opportunity Info
+# ---------------------------------------------------------------------------- #
 
 @api.route('/opportunity-info', methods=['GET'])
 def get_opportunity_info():
@@ -26,6 +35,10 @@ def get_opportunity_info():
         print(e)
         abort(500)
 
+# ---------------------------------------------------------------------------- #
+# Funnel Steps
+# ---------------------------------------------------------------------------- #
+
 @api.route('/funnel-steps', methods=['GET'])
 def get_funnel_steps():
     try:
@@ -35,6 +48,10 @@ def get_funnel_steps():
     except Exception as e:
         abort(500)
 
+# ---------------------------------------------------------------------------- #
+# Leads
+# ---------------------------------------------------------------------------- #
+
 @api.route('/leads', methods=['GET'])
 def get_leads():
     try:
@@ -43,6 +60,10 @@ def get_leads():
         return default_response(leads, 'leads')
     except Exception as e:
         abort(500)
+        
+# ---------------------------------------------------------------------------- #
+# Todos
+# ---------------------------------------------------------------------------- #
 
 @api.route('/todos', methods=['GET'])
 def get_todos():
