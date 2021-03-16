@@ -93,12 +93,15 @@ def get_lead(lead_id):
         abort(500, e)
         
 
-@api.route('/leads/add', methods=['POST'])
+@api.route('/leads', methods=['POST'])
 def add_lead():
     try:
+        # add new lead to db
         payload = request.get_json()
+        print(payload)
         lead = Lead(
-            address= payload["address"],
+            city= payload["city"],
+            state= payload["city"],
             chanceToConvert=0.15,
             dateCreated=datetime.now(),
             email=payload["email"],
@@ -106,12 +109,9 @@ def add_lead():
             lastContact=datetime.now(),
             name=payload["name"],
             phone=payload["phone"],
-            status=payload["status"]
+            status="Follow Up"
         )
-        payload = request.get_json()
-        
-        if not lead:
-            abort(404)
+        lead.insert()
         return default_response([lead.format()], 'leads')
     except Exception as e:
         abort(500, e)
