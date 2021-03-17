@@ -17,8 +17,7 @@ api = Blueprint('api', __name__)
 def get_opportunities():
     try:
         query_result = Opportunity.query.all()
-        opportunities = [opportunity.format() for opportunity in query_result]
-        return default_response(opportunities, 'opportunities')
+        return default_response([(query_result, 'opportunities')])
     except Exception as e:
         abort(500)
 
@@ -30,8 +29,7 @@ def get_opportunities():
 def get_opportunity_infos():
     try:
         query_result = OpportunityInfo.query.all()
-        opportunities_info = [opportunity_info.format() for opportunity_info in query_result]
-        return default_response(opportunities_info, 'opportunities')
+        return default_response([(query_result, 'opportunities')])
     except Exception as e:
         print(e)
         abort(500)
@@ -42,7 +40,7 @@ def get_opportunity_info(opportunity_info_id):
         opportunity_info = OpportunityInfo.query.get(opportunity_info_id)
         if not opportunity_info:
             abort(404)
-        return default_response([opportunity_info.format()], 'opportunities')
+        return default_response([(opportunity_info, 'opportunities')])
     except Exception as e:
         abort(500, e)
 
@@ -55,7 +53,7 @@ def get_funnel_steps():
     try:
         query_result = FunnelStep.query.all()
         funnel_steps = [funnel_step.format() for funnel_step in query_result]
-        return default_response(funnel_steps, 'funnelSteps')
+        return default_response([(query_result, 'funnelSteps')])
     except Exception:
         abort(500)
 
@@ -65,7 +63,7 @@ def get_funnel_step(funnel_step_id):
         funnel_step = FunnelStep.query.get(funnel_step_id)
         if not funnel_step:
             abort(404)
-        return default_response([funnel_step.format()], 'funnelSteps')
+        return default_response([(funnel_step, 'funnelSteps')])
     except Exception as e:
         abort(500, e)
 
@@ -77,8 +75,7 @@ def get_funnel_step(funnel_step_id):
 def get_leads():
     try:
         query_result = Lead.query.all()
-        leads = [lead.format() for lead in query_result]
-        return default_response(leads, 'leads')
+        return default_response([(query_result, 'leads')])
     except Exception as e:
         abort(500, e)
 
@@ -88,7 +85,7 @@ def get_lead(lead_id):
         lead = Lead.query.get(lead_id)
         if not lead:
             abort(404)
-        return default_response([lead.format()], 'leads')
+        return default_response([(lead, 'leads')])
     except Exception as e:
         abort(500, e)
         
@@ -98,10 +95,9 @@ def add_lead():
     try:
         # add new lead to db
         payload = request.get_json()
-        print(payload)
         lead = Lead(
             city= payload["city"],
-            state= payload["city"],
+            state= payload["state"],
             chanceToConvert=0.15,
             dateCreated=datetime.now(),
             email=payload["email"],
@@ -112,7 +108,16 @@ def add_lead():
             status="Follow Up"
         )
         lead.insert()
-        return default_response([lead.format()], 'leads')
+        
+        # add lead to funnel step array
+        funnelStep = FunnelStep.query.get(payload["funnelStepId"])
+        funnelStep.leads = [*funnelStep.leads, lead.id]
+        funnelStep.update()
+        
+        return default_response([
+            (lead, 'leads'),
+            (funnelStep, 'funnelSteps'),
+            ])
     except Exception as e:
         abort(500, e)
         
@@ -124,8 +129,7 @@ def add_lead():
 def get_todos():
     try:
         query_result = Todo.query.all()
-        todos = [todo.format() for todo in query_result]
-        return default_response(todos, 'todos')
+        return default_response([(query_result, 'todos')])
     except Exception as e:
         abort(500, e)
         
@@ -135,7 +139,7 @@ def get_todo(todo_id):
         todo = Todo.query.get(todo_id)
         if not todo:
             abort(404)
-        return default_response([todo.format()], 'todos')
+        return default_response([(todo, 'todos')])
     except Exception as e:
         abort(500, e)
 
