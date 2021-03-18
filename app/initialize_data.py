@@ -7,7 +7,8 @@ from .models import Lead, Opportunity, OpportunityInfo, FunnelStep, Todo
 def addLeadData():
     for data in leads_default_data:
         lead = Lead(
-            data["address"],
+            data["city"],
+            data["state"],
             data["chanceToConvert"],
             data["dateCreated"],
             data["email"],
@@ -76,7 +77,8 @@ def initialize_data():
 
 leads_default_data = [
 {
-    "address": "1355 Market St #900, San Franciso, CA, 94103",
+    "city": "San Franciso",
+    "state": "CA",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "jdorsey@twitter.com",
@@ -87,7 +89,8 @@ leads_default_data = [
     "status": "Follow Up"
 },
 {
-    "address": "9665 Cleveland St, Waterloo, IA 50701",
+    "city": "Waterloo",
+    "state": "IA",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "weidai@icloud.com",
@@ -98,7 +101,8 @@ leads_default_data = [
     "status": "Automated"
 },
 {
-    "address": "8997 Summit St, Avon, IN 4612",
+    "city": "Avon",
+    "state": "IN",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "cyrus@yahoo.com",
@@ -109,7 +113,8 @@ leads_default_data = [
     "status": "Hot Lead"
 },
 {
-    "address": "253 Edgewater Lane, Elyria, OH 44035",
+    "city": "Elyria",
+    "state": "OH",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "bolow@mac.com",
@@ -120,7 +125,8 @@ leads_default_data = [
     "status": "With Client"
 },
 {
-    "address": "196 Armstrong Avenue, Leland, NC 28451",
+    "city": "Leland",
+    "state": "NC",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "violinhi@yahoo.com",
@@ -131,7 +137,8 @@ leads_default_data = [
     "status": "Automated"
 },
 {
-    "address": "711 East Shore St, Mays Landing, NJ 08330",
+    "city": "Mays Landing",
+    "state": "NJ",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "greear@sbcglobal.net",
@@ -142,7 +149,8 @@ leads_default_data = [
     "status": "On Hold"
 },
 {
-    "address": "601 North St Louis Drive, Bedford, OH 44146",
+    "city": "Bedford",
+    "state": "OH",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "elflord@gmail.com",
@@ -153,7 +161,8 @@ leads_default_data = [
     "status": "Follow Up"
 },
 {
-    "address": "29 Mountainview St, Matthews, NC 28104",
+    "city": "Matthews",
+    "state": "NC",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "sakusha@live.com",
@@ -164,7 +173,8 @@ leads_default_data = [
     "status": "Follow Up"
 },
 {
-    "address": "9783 Purple Finch St, Saint Petersburg, FL 33702",
+    "city": "Saint Petersburg",
+    "state": "FL",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "jshirley@gmail.com",
@@ -175,7 +185,8 @@ leads_default_data = [
     "status": "Hot Lead"
 },
 {
-    "address": "9236 N. Grand Avenue, Webster, NY 14580",
+    "city": "Webster",
+    "state": "NY",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "jkonit@live.com",
@@ -186,7 +197,8 @@ leads_default_data = [
     "status": "With Client"
 },
 {
-    "address": "7675 Albany Street, North Canton, OH 44720",
+    "city": "North Canton",
+    "state": "OH",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "moonlapse@outlook.com",
@@ -197,7 +209,8 @@ leads_default_data = [
     "status": "Automated"
 },
 {
-    "address": "9266 W. Alton Court, Howell, NJ 07731",
+    "city": "Howell",
+    "state": "NJ",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "sopwith@msn.com",
@@ -208,7 +221,8 @@ leads_default_data = [
     "status": "With Client"
 },
 {
-    "address": "8431 High Noon Drive, Dublin, GA 31021",
+    "city": "Dublin",
+    "state": "GA",
     "chanceToConvert": 0.35,
     "dateCreated": "2021-02-26T15:32:37.843Z",
     "email": "wetter@gmail.com",

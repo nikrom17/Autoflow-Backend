@@ -1,4 +1,3 @@
-import os
 from sqlalchemy import Column, ARRAY, String, Integer, Boolean, DateTime, Float, create_engine, ForeignKey
 from sqlalchemy.orm import relationship
 
@@ -14,7 +13,8 @@ class Lead(db.Model):
     __tablename__ = 'lead'
 
     id = Column(Integer, primary_key=True)
-    address = Column(String, nullable=True)
+    city = Column(String, nullable=True)
+    state = Column(String, nullable=True)
     chanceToConvert = Column(Float)
     dateCreated = Column(DateTime)
     email = Column(String, nullable=True)
@@ -31,7 +31,8 @@ class Lead(db.Model):
     
     def __init__(
         self,
-        address,
+        city,
+        state,
         chanceToConvert,
         dateCreated,
         email,
@@ -41,7 +42,8 @@ class Lead(db.Model):
         phone,
         status,
     ):
-        self.address = address
+        self.city = city
+        self.state = state
         self.chanceToConvert = chanceToConvert
         self.dateCreated = dateCreated
         self.email = email
@@ -65,7 +67,8 @@ class Lead(db.Model):
     def format(self):
         return {
             'id': self.id,
-            'address': self.address,
+            'city': self.city,
+            'state': self.state,
             'chanceToConvert': self.chanceToConvert,
             'dateCreated': self.dateCreated,
             'email': self.email,

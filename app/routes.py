@@ -1,4 +1,5 @@
-from flask import Blueprint, jsonify, abort
+from datetime import datetime
+from flask import Blueprint, jsonify, abort, request
 
 # from auth import AuthError, requires_auth
 from .models import Lead, Opportunity, FunnelStep, OpportunityInfo, Todo
@@ -7,132 +8,144 @@ from .utils import default_response
 api = Blueprint('api', __name__)
 
 # ROUTES
+
+# ---------------------------------------------------------------------------- #
+# Opportunities
+# ---------------------------------------------------------------------------- #
+
 @api.route('/opportunities', methods=['GET'])
 def get_opportunities():
     try:
         query_result = Opportunity.query.all()
-        opportunities = [opportunity.format() for opportunity in query_result]
-        return default_response(opportunities, 'opportunities')
+        return default_response([(query_result, 'opportunities')])
     except Exception as e:
         abort(500)
 
+# ---------------------------------------------------------------------------- #
+# Opportunity Info
+# ---------------------------------------------------------------------------- #
+
 @api.route('/opportunity-info', methods=['GET'])
-def get_opportunity_info():
+def get_opportunity_infos():
     try:
         query_result = OpportunityInfo.query.all()
-        opportunities_info = [opportunity_info.format() for opportunity_info in query_result]
-        return default_response(opportunities_info, 'opportunities')
+        return default_response([(query_result, 'opportunities')])
     except Exception as e:
         print(e)
         abort(500)
+
+@api.route('/opportunity-info/<int:opportunity_info_id>', methods=['GET'])
+def get_opportunity_info(opportunity_info_id):
+    try:
+        opportunity_info = OpportunityInfo.query.get(opportunity_info_id)
+        if not opportunity_info:
+            abort(404)
+        return default_response([(opportunity_info, 'opportunities')])
+    except Exception as e:
+        abort(500, e)
+
+# ---------------------------------------------------------------------------- #
+# Funnel Steps
+# ---------------------------------------------------------------------------- #
 
 @api.route('/funnel-steps', methods=['GET'])
 def get_funnel_steps():
     try:
         query_result = FunnelStep.query.all()
         funnel_steps = [funnel_step.format() for funnel_step in query_result]
-        return default_response(funnel_steps, 'funnelSteps')
-    except Exception as e:
+        return default_response([(query_result, 'funnelSteps')])
+    except Exception:
         abort(500)
+
+@api.route('/funnel-steps/<int:funnel_step_id>', methods=['GET'])
+def get_funnel_step(funnel_step_id):
+    try:
+        funnel_step = FunnelStep.query.get(funnel_step_id)
+        if not funnel_step:
+            abort(404)
+        return default_response([(funnel_step, 'funnelSteps')])
+    except Exception as e:
+        abort(500, e)
+
+# ---------------------------------------------------------------------------- #
+# Leads
+# ---------------------------------------------------------------------------- #
 
 @api.route('/leads', methods=['GET'])
 def get_leads():
     try:
         query_result = Lead.query.all()
-        leads = [lead.format() for lead in query_result]
-        return default_response(leads, 'leads')
+        return default_response([(query_result, 'leads')])
     except Exception as e:
-        abort(500)
+        abort(500, e)
+
+@api.route('/leads/<int:lead_id>', methods=['GET'])
+def get_lead(lead_id):
+    try:
+        lead = Lead.query.get(lead_id)
+        if not lead:
+            abort(404)
+        return default_response([(lead, 'leads')])
+    except Exception as e:
+        abort(500, e)
+        
+
+@api.route('/leads', methods=['POST'])
+def add_lead():
+    try:
+        # add new lead to db
+        payload = request.get_json()
+        lead = Lead(
+            city= payload["city"],
+            state= payload["state"],
+            chanceToConvert=0.15,
+            dateCreated=datetime.now(),
+            email=payload["email"],
+            funnelStepId=payload["funnelStepId"],
+            lastContact=datetime.now(),
+            name=payload["name"],
+            phone=payload["phone"],
+            status="Follow Up"
+        )
+        lead.insert()
+        
+        # add lead to funnel step array
+        funnelStep = FunnelStep.query.get(payload["funnelStepId"])
+        funnelStep.leads = [*funnelStep.leads, lead.id]
+        funnelStep.update()
+        
+        return default_response([
+            (lead, 'leads'),
+            (funnelStep, 'funnelSteps'),
+            ])
+    except Exception as e:
+        abort(500, e)
+        
+# ---------------------------------------------------------------------------- #
+# Todos
+# ---------------------------------------------------------------------------- #
 
 @api.route('/todos', methods=['GET'])
 def get_todos():
     try:
         query_result = Todo.query.all()
-        todos = [todo.format() for todo in query_result]
-        return default_response(todos, 'todos')
+        return default_response([(query_result, 'todos')])
     except Exception as e:
-        print(e)
-        abort(500)
+        abort(500, e)
         
-# @api.route('/clients/<int:client_id>', methods=['GET'])
-# # @requires_auth('')
-# def get_client(client_id):
-#     try:
-#         client = Opportunity.query.get(client_id)
-#         if not client:
-#             abort(404)
-#         return default_response([client.format()], 'clients')
-#     except Exception as e:
-#         abort(500, e)
+@api.route('/todos/<int:todo_id>', methods=['GET'])
+def get_todo(todo_id):
+    try:
+        todo = Todo.query.get(todo_id)
+        if not todo:
+            abort(404)
+        return default_response([(todo, 'todos')])
+    except Exception as e:
+        abort(500, e)
 
-# @api.route('/locations', methods=['GET'])
-# # @requires_auth('')
-# def get_locations():
-#     try:
-#         query_result = Lead.query.all()
-#         locations = [location.format() for location in query_result]
-#         return default_response(locations, 'locations')
-#     except Exception as e:
-#         abort(500, e)
-
-# @api.route('/locations/client/<int:client_id>', methods=['GET'])
-# # @requires_auth('')
-# def get_client_locations(client_id):
-#     try:
-#         if not Opportunity.query.get(client_id):
-#             abort(404)
-#         query_result = Lead.query.join(Client).filter(Lead.client_id==client_id).all()
-#         locations = [location.format() for location in query_result]
-#         return default_response(locations, 'locations')
-#     except Exception as e:
-#         abort(500, e)
-
-# @api.route('/locations/<int:location_id>', methods=['GET'])
-# # @requires_auth('')
-# def get_location(location_id):
-#     try:
-#         location = FunnelStep.query.get(location_id)
-#         if not location:
-#             abort(404)
-#         return default_response([location.format()], 'locations')
-#     except Exception as e:
-#         abort(500, e)
-
-# @api.route('/deliveries', methods=['GET'])
-# # @requires_auth('')
-# def get_deliveries():
-#     try:
-#         query_result = FunnelStep.query.all()
-#         deliveries = [delivery.format() for delivery in query_result]
-#         return default_response(deliveries, 'deliveries')
-#     except Exception as e:
-#         abort(500, e)
-
-# @api.route('/deliveries/client/<int:client_id>', methods=['GET'])
-# # @requires_auth('')
-# def get_client_deliveries(client_id):
-#     try:
-#         if not Opportunity.query.get(client_id):
-#             abort(404)
-#         query_result = FunnelStep.query.join(Client).filter(Delivery.client_id==client_id).all()
-#         deliveries = [delivery.format() for delivery in query_result]
-#         return default_response(deliveries, 'deliveries')
-#     except Exception as e:
-#         abort(500)
-
-# @api.route('/deliveries/<int:delivery_id>', methods=['GET'])
-# # @requires_auth('')
-# def get_delivery(delivery_id):
-#     try:
-#         delivery = FunnelStep.query.get(delivery_id)
-#         if not delivery:
-#             abort(404)
-#         return default_response([delivery.format()], 'deliveries')
-#     except Exception as e:
-#         abort(500, e)
 
 @api.errorhandler(500)
-def not_found(error):
+def server_error(error):
     return jsonify({
         "message": "Server Error",
         "code": 500,
@@ -142,7 +155,7 @@ def not_found(error):
     
     
 @api.errorhandler(404)
-def not_found(error):
+def not_found():
     return jsonify({
         "message": "Not Found",
         "code": 404,
@@ -152,7 +165,7 @@ def not_found(error):
 
 
 @api.errorhandler(403)
-def forbidden(error):
+def forbidden():
     return jsonify({
         "message": "Forbiden",
         "code": 403,
@@ -171,7 +184,7 @@ def bad_request(error):
 
 
 @api.errorhandler(401)
-def unauthorized(error):
+def unauthorized():
     return jsonify({
         "message": "Unauthorized",
         "code": 401,
